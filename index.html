@@ -617,64 +617,59 @@ async function detectFace(){
     }
 
     requestAnimationFrame(detectFace);
-/* =====================================
+    /* =====================================
    MICROPHONE
 ===================================== */
 
-document.getElementById("micBtn")
-.addEventListener("click", async function(){
+document.getElementById("micBtn").addEventListener("click", async function(){
 
     try{
 
         if(!micStream){
 
-            micStream =
-                await navigator.mediaDevices
-                .getUserMedia({
-                    audio:true
-                });
+            micStream = await navigator.mediaDevices.getUserMedia({
+                audio:true
+            });
 
-            audioContext =
-                new (
-                    window.AudioContext ||
-                    window.webkitAudioContext
-                )();
+            audioContext = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
 
             sourceNode =
-                audioContext
-                .createMediaStreamSource(
-                    micStream
-                );
+                audioContext.createMediaStreamSource(micStream);
 
             filterNode =
-                audioContext
-                .createBiquadFilter();
+                audioContext.createBiquadFilter();
 
             filterNode.type = "lowpass";
 
-            sourceNode
-                .connect(filterNode)
-                .connect(audioContext.destination);
+            sourceNode.connect(filterNode);
+            filterNode.connect(audioContext.destination);
+        }
 
+        if(audioContext.state === "suspended"){
+            await audioContext.resume();
         }
 
         micStream.getAudioTracks()[0].enabled = true;
 
-        document.getElementById("micStatus")
-            .innerText = "🟢 Microphone is ON";
+        document.getElementById("micStatus").innerText =
+            "🟢 Microphone is ON";
 
         this.innerText = "🔴 Microphone ON";
 
         this.classList.remove("on");
         this.classList.add("off");
 
+        updateVoice();
+
     }
     catch(error){
 
         console.error(error);
 
-        document.getElementById("micStatus")
-            .innerText =
+        document.getElementById("micStatus").innerText =
             "❌ Microphone permission denied";
 
     }
@@ -686,15 +681,13 @@ document.getElementById("micBtn")
    MUTE
 ===================================== */
 
-document.getElementById("muteBtn")
-.addEventListener("click", function(){
+document.getElementById("muteBtn").addEventListener("click",function(){
 
     if(!micStream){
         return;
     }
 
-    const track =
-        micStream.getAudioTracks()[0];
+    const track = micStream.getAudioTracks()[0];
 
     track.enabled = !track.enabled;
 
@@ -702,8 +695,7 @@ document.getElementById("muteBtn")
 
         this.innerText = "🔇 Mute";
 
-        document.getElementById("micStatus")
-            .innerText =
+        document.getElementById("micStatus").innerText =
             "🟢 Microphone is ON";
 
     }
@@ -711,8 +703,7 @@ document.getElementById("muteBtn")
 
         this.innerText = "🔊 Unmute";
 
-        document.getElementById("micStatus")
-            .innerText =
+        document.getElementById("micStatus").innerText =
             "🔇 Microphone Muted";
 
     }
@@ -725,7 +716,7 @@ document.getElementById("muteBtn")
 ===================================== */
 
 document.getElementById("voiceIntensity")
-.addEventListener("input", updateVoice);
+.addEventListener("input",updateVoice);
 
 
 function updateVoice(){
@@ -736,9 +727,7 @@ function updateVoice(){
 
     const intensity =
         Number(
-            document.getElementById(
-                "voiceIntensity"
-            ).value
+            document.getElementById("voiceIntensity").value
         );
 
     if(currentVoice === "normal"){
@@ -781,16 +770,149 @@ function updateVoice(){
 
 
 /* =====================================
-   GET FACE POINT
+   FACE MESH
+===================================== */
+
+let faceMesh = null;
+
+function startFaceTracking(){
+
+    if(typeof FaceMesh === "undefined"){
+
+        loading.innerText =
+            "❌ Face tracking library not loaded";
+
+        return;
+
+    }
+
+
+    faceMesh = new FaceMesh({
+
+        locateFile: function(file){
+
+            return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file;
+
+        }
+
+    });
+
+
+    faceMesh.setOptions({
+
+        maxNumFaces:1,
+
+        refineLandmarks:true,
+
+        minDetectionConfidence:0.5,
+
+        minTrackingConfidence:0.5
+
+    });
+
+
+    faceMesh.onResults(function(results){
+
+        if(
+            !video.videoWidth ||
+            !video.videoHeight
+        ){
+            return;
+        }
+
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        if(
+            results.multiFaceLandmarks &&
+            results.multiFaceLandmarks.length > 0
+        ){
+
+            const landmarks =
+                results.multiFaceLandmarks[0];
+
+
+            faceStatus.innerText =
+                "🟢 Face Detected";
+
+
+            drawMask(landmarks);
+
+        }
+        else{
+
+            faceStatus.innerText =
+                "👤 Searching for face...";
+
+        }
+
+    });
+
+
+    detectFace();
+
+}
+
+
+/* =====================================
+   FACE DETECTION LOOP
+===================================== */
+
+async function detectFace(){
+
+    if(
+        faceMesh &&
+        video.readyState >= 2 &&
+        video.videoWidth > 0
+    ){
+
+        try{
+
+            await faceMesh.send({
+                image:video
+            });
+
+        }
+        catch(error){
+
+            console.error(
+                "Face tracking error:",
+                error
+            );
+
+        }
+
+    }
+
+    requestAnimationFrame(detectFace);
+
+}
+
+
+/* =====================================
+   FACE POINT
 ===================================== */
 
 function getPoint(landmarks,index){
 
-    const p = landmarks[index];
+    const point = landmarks[index];
 
     return {
-        x:(1-p.x) * canvas.width,
-        y:p.y * canvas.height
+
+        x:(1 - point.x) * canvas.width,
+
+        y:point.y * canvas.height
+
     };
 
 }
@@ -800,19 +922,20 @@ function getPoint(landmarks,index){
    DRAW MASK
 ===================================== */
 
-function drawMask(lm){
+function drawMask(landmarks){
 
     const left =
-        getPoint(lm,33);
+        getPoint(landmarks,33);
 
     const right =
-        getPoint(lm,263);
+        getPoint(landmarks,263);
 
     const top =
-        getPoint(lm,10);
+        getPoint(landmarks,10);
 
     const bottom =
-        getPoint(lm,152);
+        getPoint(landmarks,152);
+
 
     const centerX =
         (left.x + right.x) / 2;
@@ -820,11 +943,12 @@ function drawMask(lm){
     const centerY =
         (top.y + bottom.y) / 2;
 
+
     const width =
-        Math.abs(right.x-left.x) * 2.3;
+        Math.abs(right.x - left.x) * 2.2;
 
     const height =
-        Math.abs(bottom.y-top.y) * 1.2;
+        Math.abs(bottom.y - top.y) * 1.15;
 
 
     ctx.save();
@@ -837,30 +961,45 @@ function drawMask(lm){
 
     if(glowEnabled){
 
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 30;
         ctx.shadowColor = "#8b5cff";
+
+    }
+    else{
+
+        ctx.shadowBlur = 0;
 
     }
 
 
     if(currentMask === "robot"){
+
         robotMask(width,height);
+
     }
 
     else if(currentMask === "alien"){
+
         alienMask(width,height);
+
     }
 
     else if(currentMask === "monster"){
+
         monsterMask(width,height);
+
     }
 
     else if(currentMask === "cyber"){
+
         cyberMask(width,height);
+
     }
 
     else if(currentMask === "magic"){
+
         magicMask(width,height);
+
     }
 
 
@@ -868,16 +1007,24 @@ function drawMask(lm){
 
 
     if(particlesEnabled){
-        particles(centerX,centerY);
+
+        particles(
+            centerX,
+            centerY
+        );
+
     }
 
+
     if(scanEnabled){
+
         scanner(
             centerX,
             centerY,
             width,
             height
         );
+
     }
 
 }
@@ -890,7 +1037,7 @@ function drawMask(lm){
 function robotMask(w,h){
 
     ctx.fillStyle =
-        "rgba(100,110,125,0.9)";
+        "rgba(90,100,115,0.92)";
 
     ctx.beginPath();
 
@@ -909,7 +1056,7 @@ function robotMask(w,h){
 
     ctx.fillRect(
         -w*0.38,
-        -h*0.14,
+        -h*0.12,
         w*0.76,
         h*0.18
     );
@@ -920,17 +1067,17 @@ function robotMask(w,h){
     ctx.beginPath();
 
     ctx.arc(
-        -w*0.22,
-        -h*0.05,
-        w*0.06,
+        -w*0.21,
+        -h*0.03,
+        w*0.065,
         0,
         Math.PI*2
     );
 
     ctx.arc(
-        w*0.22,
-        -h*0.05,
-        w*0.06,
+        w*0.21,
+        -h*0.03,
+        w*0.065,
         0,
         Math.PI*2
     );
@@ -947,7 +1094,7 @@ function robotMask(w,h){
 function alienMask(w,h){
 
     ctx.fillStyle =
-        "rgba(80,220,120,0.75)";
+        "rgba(70,220,110,0.78)";
 
     ctx.beginPath();
 
@@ -964,12 +1111,12 @@ function alienMask(w,h){
     ctx.fill();
 
 
-    ctx.fillStyle = "#020202";
+    ctx.fillStyle = "#000000";
 
     ctx.beginPath();
 
     ctx.ellipse(
-        -w*0.22,
+        -w*0.21,
         -h*0.08,
         w*0.14,
         h*0.23,
@@ -979,7 +1126,7 @@ function alienMask(w,h){
     );
 
     ctx.ellipse(
-        w*0.22,
+        w*0.21,
         -h*0.08,
         w*0.14,
         h*0.23,
@@ -1000,14 +1147,14 @@ function alienMask(w,h){
 function monsterMask(w,h){
 
     ctx.fillStyle =
-        "rgba(150,40,50,0.9)";
+        "rgba(160,45,55,0.9)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         0,
         0,
-        w*0.53,
+        w*0.54,
         h*0.56,
         0,
         0,
@@ -1023,7 +1170,7 @@ function monsterMask(w,h){
 
     ctx.arc(
         -w*0.20,
-        -h*0.08,
+        -h*0.07,
         w*0.07,
         0,
         Math.PI*2
@@ -1031,7 +1178,7 @@ function monsterMask(w,h){
 
     ctx.arc(
         w*0.20,
-        -h*0.08,
+        -h*0.07,
         w*0.07,
         0,
         Math.PI*2
@@ -1065,26 +1212,26 @@ function monsterMask(w,h){
 
 function cyberMask(w,h){
 
-    ctx.strokeStyle = "#00eaff";
+    ctx.fillStyle =
+        "rgba(0,200,255,0.18)";
 
-    ctx.lineWidth = 7;
-
-    ctx.strokeRect(
-        -w*0.5,
+    ctx.fillRect(
+        -w/2,
         -h*0.43,
         w,
-        h*0.8
+        h*0.82
     );
 
 
-    ctx.fillStyle =
-        "rgba(0,220,255,0.15)";
+    ctx.strokeStyle = "#00eaff";
 
-    ctx.fillRect(
-        -w*0.48,
-        -h*0.41,
-        w*0.96,
-        h*0.76
+    ctx.lineWidth = 6;
+
+    ctx.strokeRect(
+        -w/2,
+        -h*0.43,
+        w,
+        h*0.82
     );
 
 
@@ -1117,7 +1264,7 @@ function magicMask(w,h){
 
     ctx.strokeStyle = "#c86cff";
 
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 6;
 
     ctx.beginPath();
 
@@ -1134,12 +1281,14 @@ function magicMask(w,h){
 
     ctx.strokeStyle = "#55d9ff";
 
+    ctx.lineWidth = 3;
+
     ctx.beginPath();
 
     ctx.arc(
         0,
         0,
-        w*0.67,
+        w*0.68,
         0,
         Math.PI*2
     );
@@ -1147,16 +1296,17 @@ function magicMask(w,h){
     ctx.stroke();
 
 
-    for(let i=0;i<12;i++){
+    for(let i=0;i<16;i++){
 
         const angle =
-            i*Math.PI*2/12;
+            i * Math.PI * 2 / 16;
 
         const x =
-            Math.cos(angle)*w*0.70;
+            Math.cos(angle) * w*0.72;
 
         const y =
-            Math.sin(angle)*w*0.70;
+            Math.sin(angle) * w*0.72;
+
 
         ctx.fillStyle = "#ffffff";
 
@@ -1183,21 +1333,28 @@ function magicMask(w,h){
 
 function particles(x,y){
 
-    for(let i=0;i<25;i++){
+    for(let i=0;i<35;i++){
 
         const angle =
-            Math.random()*Math.PI*2;
+            Math.random() * Math.PI * 2;
 
         const radius =
-            Math.random()*130;
+            20 + Math.random() * 150;
+
 
         const px =
-            x + Math.cos(angle)*radius;
+            x + Math.cos(angle) * radius;
 
         const py =
-            y + Math.sin(angle)*radius;
+            y + Math.sin(angle) * radius;
+
 
         ctx.fillStyle = "#ffffff";
+
+        ctx.shadowBlur = 12;
+
+        ctx.shadowColor = "#ffffff";
+
 
         ctx.beginPath();
 
@@ -1213,6 +1370,8 @@ function particles(x,y){
 
     }
 
+    ctx.shadowBlur = 0;
+
 }
 
 
@@ -1223,12 +1382,18 @@ function particles(x,y){
 function scanner(x,y,w,h){
 
     const offset =
-        Math.sin(Date.now()/400)
-        * h * 0.35;
+        Math.sin(Date.now()/350)
+        * h*0.35;
+
 
     ctx.strokeStyle = "#00ffff";
 
-    ctx.lineWidth = 3;
+    ctx.shadowBlur = 15;
+
+    ctx.shadowColor = "#00ffff";
+
+    ctx.lineWidth = 4;
+
 
     ctx.beginPath();
 
@@ -1244,15 +1409,19 @@ function scanner(x,y,w,h){
 
     ctx.stroke();
 
+
+    ctx.shadowBlur = 0;
+
 }
 
 
 /* =====================================
-   END
+   START FACE TRACKING
 ===================================== */
+
+startFaceTracking();
 
 </script>
 
 </body>
 </html>
-}

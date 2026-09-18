@@ -1,1 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Mask & Voice Studio</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    background: #050509;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+header {
+    text-align: center;
+    padding: 22px 10px;
+}
+
+header h1 {
+    font-size: 32px;
+    margin-bottom: 7px;
+}
+
+header p {
+    color: #aaa;
+}
+
+.app {
+    width: 95%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.camera-area {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #000;
+    border: 2px solid #333;
+    box-shadow: 0 0 35px rgba(120, 80, 255, 0.25);
+}
+
+video {
+    display: block;
+    width: 100%;
+    transform: scaleX(-1);
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.status {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    padding: 9px 14px;
+    border-radius: 20px;
+    background: rgba(0,0,0,.65);
+    font-size: 14px;
+}
+
+.live {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: rgba(180,0,0,.8);
+    font-size: 13px;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 18px;
+    margin: 25px auto;
+}
+
+.panel {
+    background: #101016;
+    border: 1px solid #292936;
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.panel h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 11px 14px;
+    background: #22222c;
+    color: white;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    background: #363647;
+}
+
+button.active {
+    background: #6c45ff;
+    box-shadow: 0 0 15px rgba(108,69,255,.5);
+}
+
+button.main {
+    background: #0c8f61;
+}
+
+button.off {
+    background: #8d2424;
+}
+
+label {
+    display: block;
+    margin: 12px 0 7px;
+    color: #bbb;
+}
+
+input[type="range"] {
+    width: 100%;
+}
+
+.info {
+    text-align: center;
+    padding: 15px;
+    color: #999;
+    font-size: 13px;
+}
+
+#loading {
+    text-align: center;
+    padding: 20px;
+    color: #bbb;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎭 AI Mask & Voice Studio</h1>
+    <p>Real-Time Face Masks + Character Voice Effects</p>
+</header>
+
+<div class="app">
+
+    <div id="loading">
+        Loading AI Face Tracking...
+    </div>
+
+    <div class="camera-area">
+
+        <video id="video" autoplay muted playsinline></video>
+
+        <canvas id="overlay"></canvas>
+
+        <div class="status" id="faceStatus">
+            👤 Searching for face...
+        </div>
+
+        <div class="live">
+            🔴 LIVE
+        </div>
+
+    </div>
+
+    <div class="controls">
+
+        <!-- MASKS -->
+        <div class="panel">
+
+            <h2>🎭 Choose Mask</h2>
+
+            <div class="buttons">
+
+                <button class="maskBtn active" data-mask="none">
+                    ❌ None
+                </button>
+
+                <button class="maskBtn" data-mask="robot">
+                    🤖 Robot
+                </button>
+
+                <button class="maskBtn" data-mask="alien">
+                    👽 Alien
+                </button>
+
+                <button class="maskBtn" data-mask="monster">
+                    👹 Monster
+                </button>
+
+                <button class="maskBtn" data-mask="cyber">
+                    🕶️ Cyber
+                </button>
+
+                <button class="maskBtn" data-mask="magic">
+                    ✨ Magic
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- VOICE -->
+        <div class="panel">
+
+            <h2>🎙️ Voice Effect</h2>
+
+            <div class="buttons">
+
+                <button class="voiceBtn active" data-voice="normal">
+                    🎤 Normal
+                </button>
+
+                <button class="voiceBtn" data-voice="robot">
+                    🤖 Robot
+                </button>
+
+                <button class="voiceBtn" data-voice="alien">
+                    👽 Alien
+                </button>
+
+                <button class="voiceBtn" data-voice="monster">
+                    👹 Monster
+                </button>
+
+                <button class="voiceBtn" data-voice="deep">
+                    🎬 Deep
+                </button>
+
+                <button class="voiceBtn" data-voice="high">
+                    🐿️ High
+                </button>
+
+            </div>
+
+            <label>
+                Voice Intensity
+            </label>
+
+            <input
+                type="range"
+                id="voiceIntensity"
+                min="0"
+                max="100"
+                value="50"
+            >
+
+        </div>
+
+        <!-- MICROPHONE -->
+        <div class="panel">
+
+            <h2>🎙️ Microphone</h2>
+
+            <div class="buttons">
+
+                <button id="micBtn" class="main">
+                    🎙️ Turn Mic ON
+                </button>
+
+                <button id="muteBtn">
+                    🔇 Mute
+                </button>
+
+            </div>
+
+            <p id="micStatus" style="margin-top:12px;color:#aaa;">
+                Microphone is OFF
+            </p>
+
+        </div>
+
+        <!-- EFFECT -->
+        <div class="panel">
+
+            <h2>✨ Face Effects</h2>
+
+            <div class="buttons">
+
+                <button id="particlesBtn">
+                    ✨ Particles
+                </button>
+
+                <button id="glowBtn">
+                    💫 Glow
+                </button>
+
+                <button id="scanBtn">
+                    🔵 Scanner
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="info">
+        Camera and microphone access are required for the interactive experience.
+    </div>
+
+</div>
+
+
+<!-- MediaPipe Face Mesh -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+
+<script>
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("overlay");
+const ctx = canvas.getContext("2d");
+
+const faceStatus = document.getElementById("faceStatus");
+const loading = document.getElementById("loading");
+
+let currentMask = "none";
+let currentVoice = "normal";
+
+let micStream = null;
+let audioContext = null;
+let sourceNode = null;
+let filterNode = null;
+let gainNode = null;
+
+let particlesEnabled = false;
+let glowEnabled = false;
+let scanEnabled = false;
+
+let lastFace = null;
+
+
+/* =========================
+   CAMERA
+========================= */
+
+async function startCamera() {
+
+    try {
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        loading.style.display = "none";
+
+    } catch (error) {
+
+        loading.innerText =
+            "❌ Camera permission denied. Please allow camera access.";
+
+        console.error(error);
+    }
+}
+
+startCamera();
+
+
+/* =========================
+   MEDIAPIPE FACE MESH
+========================= */
+
+const faceMesh = new FaceMesh({
+    locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+    }
+});
+
+faceMesh.setOptions({
+
+    maxNumFaces: 1,
+
+    refineLandmarks: true,
+
+    minDetectionConfidence: 0.5,
+
+    minTrackingConfidence: 0.5
+
+});
+
+
+faceMesh.onResults(results => {
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    if (
+        results.multiFaceLandmarks &&
+        results.multiFaceLandmarks.length > 0
+    ) {
+
+        lastFace =
+            results.multiFaceLandmarks[0];
+
+        faceStatus.innerText =
+            "🟢 Face Detected";
+
+        drawMask(lastFace);
+
+    } else {
+
+        lastFace = null;
+
+        faceStatus.innerText =
+            "👤 Searching for face...";
+    }
+
+});
+
+
+async function detectFace() {
+
+    if (
+        video.readyState >= 2 &&
+        video.videoWidth > 0
+    ) {
+
+        await faceMesh.send({
+            image: video
+        });
+    }
+
+    requestAnimationFrame(detectFace);
+}
+
+detectFace();
+
+
+/* =========================
+   FACE POINT
+========================= */
+
+function point(landmarks, index) {
+
+    const p = landmarks[index];
+
+    return {
+        x: (1 - p.x) * canvas.width,
+        y: p.y * canvas.height
+    };
+}
+
+
+/* =========================
+   MASK DRAWING
+========================= */
+
+function drawMask(lm) {
+
+    const leftEye = point(lm, 33);
+    const rightEye = point(lm, 263);
+
+    const nose = point(lm, 1);
+
+    const chin = point(lm, 152);
+
+    const forehead = point(lm, 10);
+
+    const centerX =
+        (leftEye.x + rightEye.x) / 2;
+
+    const centerY =
+        (forehead.y + chin.y) / 2;
+
+    const faceWidth =
+        Math.abs(rightEye.x - leftEye.x) * 2.2;
+
+    const faceHeight =
+        Math.abs(chin.y - forehead.y) * 1.15;
+
+    const angle =
+        Math.atan2(
+            rightEye.y - leftEye.y,
+            rightEye.x - leftEye.x
+        );
+
+
+    ctx.save();
+
+    ctx.translate(centerX, centerY);
+
+    ctx.rotate(angle);
+
+    if (glowEnabled) {
+
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "#7d5cff";
+    }
+
+
+    if (currentMask === "robot") {
+
+        drawRobotMask(
+            faceWidth,
+            faceHeight
+        );
+
+    }
+
+    else if (currentMask === "alien") {
+
+        drawAlienMask(
+            faceWidth,
+            faceHeight
+        );
+
+    }
+
+    else if (currentMask === "monster") {
+
+        drawMonsterMask(
+            faceWidth,
+            faceHeight
+        );
+
+    }
+
+    else if (currentMask === "cyber") {
+
+        drawCyberMask(
+            faceWidth,
+            faceHeight
+        );
+
+    }
+
+    else if (currentMask === "magic") {
+
+        drawMagicMask(
+            faceWidth,
+            faceHeight
+        );
+    }
+
+
+    ctx.restore();
+
+
+    if (particlesEnabled) {
+
+        drawParticles(centerX, centerY);
+    }
+
+    if (scanEnabled) {
+
+        drawScanner(
+            centerX,
+            centerY,
+            faceWidth,
+            faceHeight
+        );
+    }
+
+}
+
+
+/* =========================
+   ROBOT MASK
+========================= */
+
+function drawRobotMask(w, h) {
+
+    ctx.fillStyle = "rgba(90,100,115,.92)";
+
+    roundRect(
+        -w/2,
+        -h/2,
+        w,
+        h,
+        25
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle = "#050505";
+
+    roundRect(
+        -w*.38,
+        -h*.15,
+        w*.76,
+        h*.18,
+        15
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle = "#00ffff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -w*.22,
+        -h*.06,
+        w*.06,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        w*.22,
+        -h*.06,
+        w*.06,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.strokeStyle = "#ddd";
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(-w*.25,h*.2);
+
+    ctx.lineTo(w*.25,h*.2);
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   ALIEN MASK
+========================= */
+
+function drawAlienMask(w,h) {
+
+    ctx.fillStyle =
+        "rgba(80,220,120,.75)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        w*.55,
+        h*.58,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle = "#050505";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        -w*.22,
+        -h*.08,
+        w*.15,
+        h*.25,
+        -.25,
+        0,
+        Math.PI*2
+    );
+
+    ctx.ellipse(
+        w*.22,
+        -h*.08,
+        w*.15,
+        h*.25,
+        .25,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   MONSTER MASK
+========================= */
+
+function drawMonsterMask(w,h) {
+
+    ctx.fillStyle =
+        "rgba(130,30,40,.88)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        w*.52,
+        h*.55,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle = "#ffdd00";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -w*.2,
+        -h*.08,
+        w*.08,
+        0,
+        Math.PI*2
+    );
+
+    ctx.arc(
+        w*.2,
+        -h*.08,
+        w*.08,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        h*.12,
+        w*.25,
+        0,
+        Math.PI
+    );
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   CYBER MASK
+========================= */
+
+function drawCyberMask(w,h) {
+
+    ctx.strokeStyle =
+        "#00eaff";
+
+    ctx.lineWidth = 7;
+
+    ctx.strokeRect(
+        -w*.5,
+        -h*.45,
+        w,
+        h*.8
+    );
+
+    ctx.fillStyle =
+        "rgba(0,200,255,.18)";
+
+    ctx.fillRect(
+        -w*.48,
+        -h*.43,
+        w*.96,
+        h*.76
+    );
+
+    ctx.strokeStyle = "#00ffff";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-w*.35,-h*.1);
+
+    ctx.lineTo(w*.35,-h*.1);
+
+    ctx.stroke();
+
+}
+
+
+/* =========================
+   MAGIC MASK
+========================= */
+
+function drawMagicMask(w,h) {
+
+    ctx.strokeStyle =
+        "#d16cff";
+
+    ctx.lineWidth = 5;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        w*.55,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+    ctx.strokeStyle = "#65d8ff";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        w*.65,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+    for(let i=0;i<10;i++){
+
+        const a =
+            i * Math.PI * 2 / 10;
+
+        const x =
+            Math.cos(a) * w*.7;
+
+        const y =
+            Math.sin(a) * w*.7;
+
+        ctx.fillStyle = "#fff";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            4,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+}
+
+
+/* =========================
+   PARTICLES
+========================= */
+
+function drawParticles(x,y) {
+
+    for(let i=0;i<20;i++){
+
+        const a =
+            Math.random()*Math.PI*2;
+
+        const r =
+            Math.random()*120;
+
+        const px =
+            x + Math.cos(a)*r;
+
+        const py =
+            y + Math.sin(a)*r;
+
+        ctx.fillStyle = "white";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            px,
+            py,
+            2 + Math.random()*3,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+
+/* =========================
+   SCANNER
+========================= */
+
+function drawScanner(x,y,w,h) {
+
+    const time =
+        Date.now()/500;
+
+    const offset =
+        Math.sin(time)*h*.35;
+
+    ctx.strokeStyle =
+        "#00ffff";
+
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x-w*.5,
+        y+offset
+    );
+
+    ctx.lineTo(
+        x+w*.5,
+        y+offset
+    );
+
+    ctx.stroke();
+}
+
+
+/* =========================
+   ROUNDED RECT
+========================= */
+
+function roundRect(x,y,w,h,r){
+
+    ctx.beginPath();
+
+    ctx.moveTo(x+r,y);
+
+    ctx.lineTo(x+w-r,y);
+
+    ctx.quadraticCurveTo(
+        x+w,y,
+        x+w,y+r
+    );
+
+    ctx.lineTo(
+        x+w,
+        y+h-r
+    );
+
+    ctx.quadraticCurveTo(
+        x+w,
+        y+h,
+        x+w-r,
+        y+h
+    );
+
+    ctx.lineTo(
+        x+r,
+        y+h
+    );
+
+    ctx.quadraticCurveTo(
+        x,
+        y+h,
+        x,
+        y+h-r
+    );
+
+    ctx.lineTo(
+        x,
+        y+r
+    );
+
+    ctx.quadraticCurveTo(
+        x,
+        y,
+        x+r,
+        y
+    );
+
+    ctx.closePath();
+}
+
+
+/* =========================
+   MASK BUTTONS
+========================= */
+
+document.querySelectorAll(".maskBtn")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+        .querySelectorAll(".maskBtn")
+        .forEach(b =>
+            b.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        currentMask =
+            button.dataset.mask;
+    });
+
+});
+
+
+/* =========================
+   VOICE BUTTONS
+========================= */
+
+document.querySelectorAll(".voiceBtn")
+.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+        .querySelectorAll(".voiceBtn")
+        .forEach(b =>
+            b.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        currentVoice =
+            button.dataset.voice;
+
+        updateVoiceEffect();
+    });
+
+});
+
+
+/* =========================
+   MICROPHONE
+========================= */
+
+const micBtn =
+    document.getElementById("micBtn");
+
+const muteBtn =
+    document.getElementById("muteBtn");
+
+const micStatus =
+    document.getElementById("micStatus");
+
+
+micBtn.addEventListener("click", async () => {
+
+    if (!micStream) {
+
+        try {
+
+            micStream =
+                await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+            setupAudio();
+
+            micStatus.innerText =
+                "🎙️ Microphone is ON";
+
+            micBtn.innerText =
+                "🔴 Microphone ON";
+
+            micBtn.classList.add("off");
+
+        }
+
+        catch(error) {
+
+            micStatus.innerText =
+                "❌ Microphone permission denied.";
+
+            console.error(error);
+        }
+
+    }
+
+});
+
+
+/* =========================
+   AUDIO SETUP
+========================= */
+
+function setupAudio() {
+
+    audioContext =
+        new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+    sourceNode =
+        audioContext.createMediaStreamSource(
+            micStream
+        );
+
+    filterNode =
+        audioContext.createBiquadFilter();
+
+    gainNode =
+        audioContext.createGain();
+
+    filterNode.type = "lowpass";
+
+    filterNode.frequency.value =
+        20000;
+
+    gainNode.gain.value = 1;
+
+    sourceNode
+        .connect(filterNode)
+        .connect(gainNode)
+        .connect(audioContext.destination);
+
+    updateVoiceEffect();
+}
+
+
+/* =========================
+   VOICE EFFECT
+========================= */
+
+function updateVoiceEffect() {
+
+    if (!audioContext || !filterNode)
+        return;
+
+    const intensity =
+        Number(
+            document.getElementById(
+                "voiceIntensity"
+            ).value
+        ) / 100;
+
+
+    if (currentVoice === "normal") {
+
+        filterNode.frequency.value =
+            20000;
+
+    }
+
+    else if (currentVoice === "robot") {
+
+        filterNode.frequency.value =
+            1000 + intensity*2500;
+
+    }
+
+    else if (currentVoice === "alien") {
+
+        filterNode.frequency.value =
+            3000 + intensity*5000;
+
+    }
+
+    else if (currentVoice === "monster") {
+
+        filterNode.frequency.value =
+            500 + intensity*1200;
+
+    }
+
+    else if (currentVoice === "deep") {
+
+        filterNode.frequency.value =
+            600 + intensity*900;
+
+    }
+
+    else if (currentVoice === "high") {
+
+        filterNode.frequency.value =
+            5000 + intensity*10000;
+    }
+
+}
+
+
+document
+.getElementById("voiceIntensity")
+.addEventListener(
+    "input",
+    updateVoiceEffect
+);
+
+
+/* =========================
+   MUTE
+========================= */
+
+muteBtn.addEventListener("click", () => {
+
+    if (!micStream)
+        return;
+
+    const tracks =
+        micStream.getAudioTracks();
+
+    tracks.forEach(track => {
+
+        track.enabled =
+            !track.enabled;
+
+        muteBtn.innerText =
+            track.enabled
+            ? "🔇 Mute"
+            : "🔊 Unmute";
+
+        micStatus.innerText =
+            track.enabled
+            ? "🎙️ Microphone is ON"
+            : "🔇 Microphone Muted";
+    });
+
+});
+
+
+/* =========================
+   FACE EFFECT BUTTONS
+========================= */
+
+document
+.getElementById("particlesBtn")
+.addEventListener("click", function(){
+
+    particlesEnabled =
+        !particlesEnabled;
+
+    this.classList.toggle(this.classList.toggle( "active", particlesEnabled );
+
+});
+
+document
+
+.getElementById("glowBtn")
+
+.addEventListener("click", function(){
+
+glowEnabled = !glowEnabled;
+
+this.classList.toggle( "active", glowEnabled );
+
+});
+
+document
+
+.getElementById("scanBtn")
+
+.addEventListener("click", function(){
+
+scanEnabled = ! scanEnabled;
+
+this.classList.toggle( "active", scanEnabled
+
+);
+
+});
+
+</script>
+
+</body>
+
+</html>
+
 

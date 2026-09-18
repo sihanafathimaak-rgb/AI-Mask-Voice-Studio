@@ -40,6 +40,12 @@ header p{
     margin:auto;
 }
 
+#loading{
+    text-align:center;
+    padding:15px;
+    color:#aaa;
+}
+
 .camera-area{
     position:relative;
     width:100%;
@@ -54,8 +60,8 @@ header p{
 #video{
     width:100%;
     display:block;
-    transform:scaleX(-1);
     background:#000;
+    transform:scaleX(-1);
 }
 
 #overlay{
@@ -79,8 +85,8 @@ header p{
 
 .live{
     position:absolute;
-    right:15px;
     top:15px;
+    right:15px;
     background:#d52b5c;
     padding:8px 13px;
     border-radius:20px;
@@ -89,7 +95,8 @@ header p{
 
 .controls{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
     gap:16px;
     margin:22px auto;
 }
@@ -149,12 +156,6 @@ input[type="range"]{
     width:100%;
 }
 
-#loading{
-    text-align:center;
-    padding:15px;
-    color:#aaa;
-}
-
 .info{
     text-align:center;
     color:#888;
@@ -173,181 +174,183 @@ input[type="range"]{
 
 <div class="app">
 
-    <div id="loading">
-        📷 Starting camera...
+<div id="loading">
+    📷 Starting camera...
+</div>
+
+<div class="camera-area">
+
+    <video
+        id="video"
+        autoplay
+        muted
+        playsinline>
+    </video>
+
+    <canvas id="overlay"></canvas>
+
+    <div class="status" id="faceStatus">
+        👤 Waiting for face...
     </div>
 
-    <div class="camera-area">
-
-        <video id="video" autoplay muted playsinline></video>
-
-        <canvas id="overlay"></canvas>
-
-        <div class="status" id="faceStatus">
-            👤 Waiting for face...
-        </div>
-
-        <div class="live">
-            🔴 LIVE
-        </div>
-
-    </div>
-
-
-    <div class="controls">
-
-        <!-- MASK -->
-
-        <div class="panel">
-
-            <h2>🎭 Choose Mask</h2>
-
-            <div class="buttons">
-
-                <button class="maskBtn active" data-mask="none">
-                    ❌ None
-                </button>
-
-                <button class="maskBtn" data-mask="robot">
-                    🤖 Robot
-                </button>
-
-                <button class="maskBtn" data-mask="alien">
-                    👽 Alien
-                </button>
-
-                <button class="maskBtn" data-mask="monster">
-                    👹 Monster
-                </button>
-
-                <button class="maskBtn" data-mask="cyber">
-                    🕶️ Cyber
-                </button>
-
-                <button class="maskBtn" data-mask="magic">
-                    ✨ Magic
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- VOICE -->
-
-        <div class="panel">
-
-            <h2>🎙️ Voice Effect</h2>
-
-            <div class="buttons">
-
-                <button class="voiceBtn active" data-voice="normal">
-                    🎤 Normal
-                </button>
-
-                <button class="voiceBtn" data-voice="robot">
-                    🤖 Robot
-                </button>
-
-                <button class="voiceBtn" data-voice="alien">
-                    👽 Alien
-                </button>
-
-                <button class="voiceBtn" data-voice="monster">
-                    👹 Monster
-                </button>
-
-                <button class="voiceBtn" data-voice="deep">
-                    🎬 Deep
-                </button>
-
-                <button class="voiceBtn" data-voice="high">
-                    🐿️ High
-                </button>
-
-            </div>
-
-            <label>Voice Intensity</label>
-
-            <input
-                id="voiceIntensity"
-                type="range"
-                min="0"
-                max="100"
-                value="50"
-            >
-
-        </div>
-
-
-        <!-- MIC -->
-
-        <div class="panel">
-
-            <h2>🎙️ Microphone</h2>
-
-            <div class="buttons">
-
-                <button id="micBtn" class="on">
-                    🎙️ Turn Mic ON
-                </button>
-
-                <button id="muteBtn">
-                    🔇 Mute
-                </button>
-
-            </div>
-
-            <p id="micStatus" style="margin-top:12px;color:#aaa;">
-                Microphone is OFF
-            </p>
-
-        </div>
-
-
-        <!-- EFFECTS -->
-
-        <div class="panel">
-
-            <h2>✨ Face Effects</h2>
-
-            <div class="buttons">
-
-                <button id="particlesBtn">
-                    ✨ Particles
-                </button>
-
-                <button id="glowBtn">
-                    💫 Glow
-                </button>
-
-                <button id="scanBtn">
-                    🔵 Scanner
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="info">
-        Allow camera and microphone permissions when requested.
+    <div class="live">
+        🔴 LIVE
     </div>
 
 </div>
 
 
-<!-- MEDIA PIPE -->
+<div class="controls">
+
+<!-- MASK -->
+
+<div class="panel">
+
+<h2>🎭 Choose Mask</h2>
+
+<div class="buttons">
+
+<button class="maskBtn active" data-mask="none">
+❌ None
+</button>
+
+<button class="maskBtn" data-mask="robot">
+🤖 Robot
+</button>
+
+<button class="maskBtn" data-mask="alien">
+👽 Alien
+</button>
+
+<button class="maskBtn" data-mask="monster">
+👹 Monster
+</button>
+
+<button class="maskBtn" data-mask="cyber">
+🕶️ Cyber
+</button>
+
+<button class="maskBtn" data-mask="magic">
+✨ Magic
+</button>
+
+</div>
+</div>
+
+
+<!-- VOICE -->
+
+<div class="panel">
+
+<h2>🎙️ Voice Effect</h2>
+
+<div class="buttons">
+
+<button class="voiceBtn active" data-voice="normal">
+🎤 Normal
+</button>
+
+<button class="voiceBtn" data-voice="robot">
+🤖 Robot
+</button>
+
+<button class="voiceBtn" data-voice="alien">
+👽 Alien
+</button>
+
+<button class="voiceBtn" data-voice="monster">
+👹 Monster
+</button>
+
+<button class="voiceBtn" data-voice="deep">
+🎬 Deep
+</button>
+
+<button class="voiceBtn" data-voice="high">
+🐿️ High
+</button>
+
+</div>
+
+<label>Voice Intensity</label>
+
+<input
+    id="voiceIntensity"
+    type="range"
+    min="0"
+    max="100"
+    value="50">
+
+</div>
+
+
+<!-- MICROPHONE -->
+
+<div class="panel">
+
+<h2>🎙️ Microphone</h2>
+
+<div class="buttons">
+
+<button id="micBtn" class="on">
+🎙️ Turn Mic ON
+</button>
+
+<button id="muteBtn">
+🔇 Mute
+</button>
+
+</div>
+
+<p id="micStatus" style="margin-top:12px;color:#aaa;">
+Microphone is OFF
+</p>
+
+</div>
+
+
+<!-- FACE EFFECTS -->
+
+<div class="panel">
+
+<h2>✨ Face Effects</h2>
+
+<div class="buttons">
+
+<button id="particlesBtn">
+✨ Particles
+</button>
+
+<button id="glowBtn">
+💫 Glow
+</button>
+
+<button id="scanBtn">
+🔵 Scanner
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="info">
+Allow camera and microphone permissions when requested.
+</div>
+
+</div>
+
+
+<!-- MediaPipe -->
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
 
-
 <script>
 
-/* ==========================================
-   BASIC VARIABLES
-========================================== */
+/* =====================================
+   VARIABLES
+===================================== */
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("overlay");
@@ -369,39 +372,40 @@ let sourceNode = null;
 let filterNode = null;
 
 
-/* ==========================================
+/* =====================================
    MASK BUTTONS
-   REGISTER FIRST
-========================================== */
+===================================== */
 
-document.querySelectorAll(".maskBtn").forEach(button => {
+document.querySelectorAll(".maskBtn").forEach(function(button){
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click",function(){
 
         document.querySelectorAll(".maskBtn")
-        .forEach(b => b.classList.remove("active"));
+        .forEach(function(b){
+            b.classList.remove("active");
+        });
 
         button.classList.add("active");
 
         currentMask = button.dataset.mask;
 
-        faceStatus.innerText =
-            "🎭 " + currentMask.toUpperCase() + " MASK";
     });
 
 });
 
 
-/* ==========================================
+/* =====================================
    VOICE BUTTONS
-========================================== */
+===================================== */
 
-document.querySelectorAll(".voiceBtn").forEach(button => {
+document.querySelectorAll(".voiceBtn").forEach(function(button){
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click",function(){
 
         document.querySelectorAll(".voiceBtn")
-        .forEach(b => b.classList.remove("active"));
+        .forEach(function(b){
+            b.classList.remove("active");
+        });
 
         button.classList.add("active");
 
@@ -414,12 +418,12 @@ document.querySelectorAll(".voiceBtn").forEach(button => {
 });
 
 
-/* ==========================================
-   PARTICLES
-========================================== */
+/* =====================================
+   PARTICLES BUTTON
+===================================== */
 
 document.getElementById("particlesBtn")
-.addEventListener("click", function(){
+.addEventListener("click",function(){
 
     particlesEnabled = !particlesEnabled;
 
@@ -431,12 +435,12 @@ document.getElementById("particlesBtn")
 });
 
 
-/* ==========================================
-   GLOW
-========================================== */
+/* =====================================
+   GLOW BUTTON
+===================================== */
 
 document.getElementById("glowBtn")
-.addEventListener("click", function(){
+.addEventListener("click",function(){
 
     glowEnabled = !glowEnabled;
 
@@ -448,12 +452,12 @@ document.getElementById("glowBtn")
 });
 
 
-/* ==========================================
-   SCANNER
-========================================== */
+/* =====================================
+   SCANNER BUTTON
+===================================== */
 
 document.getElementById("scanBtn")
-.addEventListener("click", function(){
+.addEventListener("click",function(){
 
     scanEnabled = !scanEnabled;
 
@@ -465,165 +469,16 @@ document.getElementById("scanBtn")
 });
 
 
-/* ==========================================
-   MICROPHONE
-========================================== */
-
-document.getElementById("micBtn")
-.addEventListener("click", async function(){
-
-    if (micStream) return;
-
-    try{
-
-        micStream =
-            await navigator.mediaDevices
-            .getUserMedia({
-                audio:true
-            });
-
-        audioContext =
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
-
-        sourceNode =
-            audioContext
-            .createMediaStreamSource(
-                micStream
-            );
-
-        filterNode =
-            audioContext
-            .createBiquadFilter();
-
-        filterNode.type = "lowpass";
-
-        filterNode.frequency.value = 20000;
-
-        sourceNode
-        .connect(filterNode)
-        .connect(audioContext.destination);
-
-        document.getElementById("micStatus")
-        .innerText =
-            "🟢 Microphone is ON";
-
-        this.innerText =
-            "🔴 Microphone ON";
-
-        this.classList.remove("on");
-        this.classList.add("off");
-
-    }
-
-    catch(error){
-
-        document.getElementById("micStatus")
-        .innerText =
-            "❌ Microphone permission denied";
-
-        console.error(error);
-
-    }
-
-});
-
-
-/* ==========================================
-   MUTE
-========================================== */
-
-document.getElementById("muteBtn")
-.addEventListener("click", function(){
-
-    if (!micStream) return;
-
-    const track =
-        micStream.getAudioTracks()[0];
-
-    track.enabled = !track.enabled;
-
-    this.innerText =
-        track.enabled
-        ? "🔇 Mute"
-        : "🔊 Unmute";
-
-    document.getElementById("micStatus")
-    .innerText =
-        track.enabled
-        ? "🟢 Microphone is ON"
-        : "🔇 Microphone Muted";
-
-});
-
-
-/* ==========================================
-   VOICE EFFECT
-========================================== */
-
-function updateVoice(){
-
-    if (!filterNode) return;
-
-    const intensity =
-        Number(
-            document.getElementById(
-                "voiceIntensity"
-            ).value
-        );
-
-    if(currentVoice === "normal"){
-        filterNode.frequency.value = 20000;
-    }
-
-    else if(currentVoice === "robot"){
-        filterNode.frequency.value =
-            1200 + intensity * 20;
-    }
-
-    else if(currentVoice === "alien"){
-        filterNode.frequency.value =
-            3000 + intensity * 30;
-    }
-
-    else if(currentVoice === "monster"){
-        filterNode.frequency.value =
-            500 + intensity * 10;
-    }
-
-    else if(currentVoice === "deep"){
-        filterNode.frequency.value =
-            700 + intensity * 8;
-    }
-
-    else if(currentVoice === "high"){
-        filterNode.frequency.value =
-            5000 + intensity * 40;
-    }
-
-}
-
-
-document.getElementById("voiceIntensity")
-.addEventListener(
-    "input",
-    updateVoice
-);
-
-
-/* ==========================================
+/* =====================================
    CAMERA
-========================================== */
+===================================== */
 
 async function startCamera(){
 
     try{
 
         const stream =
-            await navigator.mediaDevices
-            .getUserMedia({
+            await navigator.mediaDevices.getUserMedia({
                 video:{
                     facingMode:"user"
                 },
@@ -640,13 +495,12 @@ async function startCamera(){
         startFaceTracking();
 
     }
-
     catch(error){
 
-        loading.innerText =
-            "❌ Camera permission required";
-
         console.error(error);
+
+        loading.innerText =
+            "❌ Camera permission denied";
 
     }
 
@@ -655,9 +509,9 @@ async function startCamera(){
 startCamera();
 
 
-/* ==========================================
-   FACE TRACKING
-========================================== */
+/* =====================================
+   FACE MESH
+===================================== */
 
 let faceMesh = null;
 
@@ -666,100 +520,75 @@ function startFaceTracking(){
     if(typeof FaceMesh === "undefined"){
 
         loading.innerText =
-            "⚠️ Face tracking library failed to load.";
+            "❌ Face tracking library not loaded";
 
         return;
     }
 
-    try{
+    faceMesh = new FaceMesh({
 
-        faceMesh = new FaceMesh({
+        locateFile: function(file){
+            return "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/" + file;
+        }
 
-            locateFile: function(file){
+    });
 
-                return
-                `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+    faceMesh.setOptions({
 
-            }
+        maxNumFaces:1,
 
-        });
+        refineLandmarks:true,
 
-        faceMesh.setOptions({
+        minDetectionConfidence:0.5,
 
-            maxNumFaces:1,
+        minTrackingConfidence:0.5
 
-            refineLandmarks:true,
-
-            minDetectionConfidence:0.5,
-
-            minTrackingConfidence:0.5
-
-        });
+    });
 
 
-        faceMesh.onResults(function(results){
+    faceMesh.onResults(function(results){
 
-            canvas.width =
-                video.videoWidth;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-            canvas.height =
-                video.videoHeight;
-
-            ctx.clearRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-
-            if(
-                results.multiFaceLandmarks &&
-                results.multiFaceLandmarks.length
-            ){
-
-                const landmarks =
-                    results.multiFaceLandmarks[0];
-
-                faceStatus.innerText =
-                    "🟢 Face Detected";
-
-                drawMask(landmarks);
-
-            }
-
-            else{
-
-                faceStatus.innerText =
-                    "👤 Searching for face...";
-
-            }
-
-        });
-
-
-        detectFace();
-
-    }
-
-    catch(error){
-
-        console.error(
-            "Face tracking error:",
-            error
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
         );
 
-        loading.innerText =
-            "⚠️ Camera works, but face tracking could not start.";
+        if(
+            results.multiFaceLandmarks &&
+            results.multiFaceLandmarks.length > 0
+        ){
 
-    }
+            faceStatus.innerText =
+                "🟢 Face Detected";
+
+            drawMask(
+                results.multiFaceLandmarks[0]
+            );
+
+        }
+        else{
+
+            faceStatus.innerText =
+                "👤 Searching for face...";
+
+        }
+
+    });
+
+
+    detectFace();
 
 }
 
 
-/* ==========================================
-   SEND VIDEO TO MEDIAPIPE
-========================================== */
+/* =====================================
+   FACE DETECTION LOOP
+===================================== */
 
 async function detectFace(){
 
@@ -776,49 +605,200 @@ async function detectFace(){
             });
 
         }
-
         catch(error){
 
-            console.error(error);
+            console.error(
+                "Face error:",
+                error
+            );
 
         }
 
     }
 
-    requestAnimationFrame(
-        detectFace
-    );
+    requestAnimationFrame(detectFace);
+/* =====================================
+   MICROPHONE
+===================================== */
+
+document.getElementById("micBtn")
+.addEventListener("click", async function(){
+
+    try{
+
+        if(!micStream){
+
+            micStream =
+                await navigator.mediaDevices
+                .getUserMedia({
+                    audio:true
+                });
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+            sourceNode =
+                audioContext
+                .createMediaStreamSource(
+                    micStream
+                );
+
+            filterNode =
+                audioContext
+                .createBiquadFilter();
+
+            filterNode.type = "lowpass";
+
+            sourceNode
+                .connect(filterNode)
+                .connect(audioContext.destination);
+
+        }
+
+        micStream.getAudioTracks()[0].enabled = true;
+
+        document.getElementById("micStatus")
+            .innerText = "🟢 Microphone is ON";
+
+        this.innerText = "🔴 Microphone ON";
+
+        this.classList.remove("on");
+        this.classList.add("off");
+
+    }
+    catch(error){
+
+        console.error(error);
+
+        document.getElementById("micStatus")
+            .innerText =
+            "❌ Microphone permission denied";
+
+    }
+
+});
+
+
+/* =====================================
+   MUTE
+===================================== */
+
+document.getElementById("muteBtn")
+.addEventListener("click", function(){
+
+    if(!micStream){
+        return;
+    }
+
+    const track =
+        micStream.getAudioTracks()[0];
+
+    track.enabled = !track.enabled;
+
+    if(track.enabled){
+
+        this.innerText = "🔇 Mute";
+
+        document.getElementById("micStatus")
+            .innerText =
+            "🟢 Microphone is ON";
+
+    }
+    else{
+
+        this.innerText = "🔊 Unmute";
+
+        document.getElementById("micStatus")
+            .innerText =
+            "🔇 Microphone Muted";
+
+    }
+
+});
+
+
+/* =====================================
+   VOICE INTENSITY
+===================================== */
+
+document.getElementById("voiceIntensity")
+.addEventListener("input", updateVoice);
+
+
+function updateVoice(){
+
+    if(!filterNode){
+        return;
+    }
+
+    const intensity =
+        Number(
+            document.getElementById(
+                "voiceIntensity"
+            ).value
+        );
+
+    if(currentVoice === "normal"){
+
+        filterNode.frequency.value = 20000;
+
+    }
+    else if(currentVoice === "robot"){
+
+        filterNode.frequency.value =
+            1200 + intensity * 20;
+
+    }
+    else if(currentVoice === "alien"){
+
+        filterNode.frequency.value =
+            3000 + intensity * 30;
+
+    }
+    else if(currentVoice === "monster"){
+
+        filterNode.frequency.value =
+            500 + intensity * 10;
+
+    }
+    else if(currentVoice === "deep"){
+
+        filterNode.frequency.value =
+            700 + intensity * 8;
+
+    }
+    else if(currentVoice === "high"){
+
+        filterNode.frequency.value =
+            5000 + intensity * 40;
+
+    }
 
 }
 
 
-/* ==========================================
+/* =====================================
    GET FACE POINT
-========================================== */
+===================================== */
 
 function getPoint(landmarks,index){
 
-    const p =
-        landmarks[index];
+    const p = landmarks[index];
 
-    return{
-
-        x:
-            (1-p.x) *
-            canvas.width,
-
-        y:
-            p.y *
-            canvas.height
-
+    return {
+        x:(1-p.x) * canvas.width,
+        y:p.y * canvas.height
     };
 
 }
 
 
-/* ==========================================
+/* =====================================
    DRAW MASK
-========================================== */
+===================================== */
 
 function drawMask(lm){
 
@@ -835,20 +815,16 @@ function drawMask(lm){
         getPoint(lm,152);
 
     const centerX =
-        (left.x + right.x)/2;
+        (left.x + right.x) / 2;
 
     const centerY =
-        (top.y + bottom.y)/2;
+        (top.y + bottom.y) / 2;
 
     const width =
-        Math.abs(
-            right.x-left.x
-        ) * 2.3;
+        Math.abs(right.x-left.x) * 2.3;
 
     const height =
-        Math.abs(
-            bottom.y-top.y
-        ) * 1.2;
+        Math.abs(bottom.y-top.y) * 1.2;
 
 
     ctx.save();
@@ -867,47 +843,54 @@ function drawMask(lm){
     }
 
 
-    if(currentMask === "robot")
+    if(currentMask === "robot"){
         robotMask(width,height);
+    }
 
-    if(currentMask === "alien")
+    else if(currentMask === "alien"){
         alienMask(width,height);
+    }
 
-    if(currentMask === "monster")
+    else if(currentMask === "monster"){
         monsterMask(width,height);
+    }
 
-    if(currentMask === "cyber")
+    else if(currentMask === "cyber"){
         cyberMask(width,height);
+    }
 
-    if(currentMask === "magic")
+    else if(currentMask === "magic"){
         magicMask(width,height);
+    }
 
 
     ctx.restore();
 
 
-    if(particlesEnabled)
+    if(particlesEnabled){
         particles(centerX,centerY);
+    }
 
-    if(scanEnabled)
+    if(scanEnabled){
         scanner(
             centerX,
             centerY,
             width,
             height
         );
+    }
 
 }
 
 
-/* ==========================================
-   ROBOT
-========================================== */
+/* =====================================
+   ROBOT MASK
+===================================== */
 
 function robotMask(w,h){
 
     ctx.fillStyle =
-        "rgba(100,110,125,.9)";
+        "rgba(100,110,125,0.9)";
 
     ctx.beginPath();
 
@@ -922,34 +905,32 @@ function robotMask(w,h){
     ctx.fill();
 
 
-    ctx.fillStyle =
-        "#050505";
+    ctx.fillStyle = "#050505";
 
     ctx.fillRect(
-        -w*.38,
-        -h*.14,
-        w*.76,
-        h*.18
+        -w*0.38,
+        -h*0.14,
+        w*0.76,
+        h*0.18
     );
 
 
-    ctx.fillStyle =
-        "#00ffff";
+    ctx.fillStyle = "#00ffff";
 
     ctx.beginPath();
 
     ctx.arc(
-        -w*.22,
-        -h*.05,
-        w*.06,
+        -w*0.22,
+        -h*0.05,
+        w*0.06,
         0,
         Math.PI*2
     );
 
     ctx.arc(
-        w*.22,
-        -h*.05,
-        w*.06,
+        w*0.22,
+        -h*0.05,
+        w*0.06,
         0,
         Math.PI*2
     );
@@ -959,22 +940,22 @@ function robotMask(w,h){
 }
 
 
-/* ==========================================
-   ALIEN
-========================================== */
+/* =====================================
+   ALIEN MASK
+===================================== */
 
 function alienMask(w,h){
 
     ctx.fillStyle =
-        "rgba(80,220,120,.75)";
+        "rgba(80,220,120,0.75)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         0,
         0,
-        w*.55,
-        h*.58,
+        w*0.55,
+        h*0.58,
         0,
         0,
         Math.PI*2
@@ -983,26 +964,25 @@ function alienMask(w,h){
     ctx.fill();
 
 
-    ctx.fillStyle =
-        "#020202";
+    ctx.fillStyle = "#020202";
 
     ctx.beginPath();
 
     ctx.ellipse(
-        -w*.22,
-        -h*.08,
-        w*.14,
-        h*.23,
+        -w*0.22,
+        -h*0.08,
+        w*0.14,
+        h*0.23,
         0,
         0,
         Math.PI*2
     );
 
     ctx.ellipse(
-        w*.22,
-        -h*.08,
-        w*.14,
-        h*.23,
+        w*0.22,
+        -h*0.08,
+        w*0.14,
+        h*0.23,
         0,
         0,
         Math.PI*2
@@ -1013,22 +993,22 @@ function alienMask(w,h){
 }
 
 
-/* ==========================================
-   MONSTER
-========================================== */
+/* =====================================
+   MONSTER MASK
+===================================== */
 
 function monsterMask(w,h){
 
     ctx.fillStyle =
-        "rgba(150,40,50,.9)";
+        "rgba(150,40,50,0.9)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         0,
         0,
-        w*.53,
-        h*.56,
+        w*0.53,
+        h*0.56,
         0,
         0,
         Math.PI*2
@@ -1037,23 +1017,22 @@ function monsterMask(w,h){
     ctx.fill();
 
 
-    ctx.fillStyle =
-        "#ffe000";
+    ctx.fillStyle = "#ffe000";
 
     ctx.beginPath();
 
     ctx.arc(
-        -w*.2,
-        -h*.08,
-        w*.07,
+        -w*0.20,
+        -h*0.08,
+        w*0.07,
         0,
         Math.PI*2
     );
 
     ctx.arc(
-        w*.2,
-        -h*.08,
-        w*.07,
+        w*0.20,
+        -h*0.08,
+        w*0.07,
         0,
         Math.PI*2
     );
@@ -1061,8 +1040,7 @@ function monsterMask(w,h){
     ctx.fill();
 
 
-    ctx.strokeStyle =
-        "#fff";
+    ctx.strokeStyle = "#ffffff";
 
     ctx.lineWidth = 5;
 
@@ -1070,8 +1048,8 @@ function monsterMask(w,h){
 
     ctx.arc(
         0,
-        h*.12,
-        w*.25,
+        h*0.12,
+        w*0.25,
         0,
         Math.PI
     );
@@ -1081,51 +1059,49 @@ function monsterMask(w,h){
 }
 
 
-/* ==========================================
-   CYBER
-========================================== */
+/* =====================================
+   CYBER MASK
+===================================== */
 
 function cyberMask(w,h){
 
-    ctx.strokeStyle =
-        "#00eaff";
+    ctx.strokeStyle = "#00eaff";
 
     ctx.lineWidth = 7;
 
     ctx.strokeRect(
-        -w*.5,
-        -h*.43,
+        -w*0.5,
+        -h*0.43,
         w,
-        h*.8
+        h*0.8
     );
 
 
     ctx.fillStyle =
-        "rgba(0,220,255,.15)";
+        "rgba(0,220,255,0.15)";
 
     ctx.fillRect(
-        -w*.48,
-        -h*.41,
-        w*.96,
-        h*.76
+        -w*0.48,
+        -h*0.41,
+        w*0.96,
+        h*0.76
     );
 
 
-    ctx.strokeStyle =
-        "#00ffff";
+    ctx.strokeStyle = "#00ffff";
 
     ctx.lineWidth = 3;
 
     ctx.beginPath();
 
     ctx.moveTo(
-        -w*.35,
-        -h*.08
+        -w*0.35,
+        -h*0.08
     );
 
     ctx.lineTo(
-        w*.35,
-        -h*.08
+        w*0.35,
+        -h*0.08
     );
 
     ctx.stroke();
@@ -1133,14 +1109,13 @@ function cyberMask(w,h){
 }
 
 
-/* ==========================================
-   MAGIC
-========================================== */
+/* =====================================
+   MAGIC MASK
+===================================== */
 
 function magicMask(w,h){
 
-    ctx.strokeStyle =
-        "#c86cff";
+    ctx.strokeStyle = "#c86cff";
 
     ctx.lineWidth = 5;
 
@@ -1149,7 +1124,7 @@ function magicMask(w,h){
     ctx.arc(
         0,
         0,
-        w*.55,
+        w*0.55,
         0,
         Math.PI*2
     );
@@ -1157,15 +1132,14 @@ function magicMask(w,h){
     ctx.stroke();
 
 
-    ctx.strokeStyle =
-        "#55d9ff";
+    ctx.strokeStyle = "#55d9ff";
 
     ctx.beginPath();
 
     ctx.arc(
         0,
         0,
-        w*.67,
+        w*0.67,
         0,
         Math.PI*2
     );
@@ -1175,17 +1149,16 @@ function magicMask(w,h){
 
     for(let i=0;i<12;i++){
 
-        const a =
+        const angle =
             i*Math.PI*2/12;
 
         const x =
-            Math.cos(a)*w*.7;
+            Math.cos(angle)*w*0.70;
 
         const y =
-            Math.sin(a)*w*.7;
+            Math.sin(angle)*w*0.70;
 
-        ctx.fillStyle =
-            "#fff";
+        ctx.fillStyle = "#ffffff";
 
         ctx.beginPath();
 
@@ -1204,9 +1177,9 @@ function magicMask(w,h){
 }
 
 
-/* ==========================================
+/* =====================================
    PARTICLES
-========================================== */
+===================================== */
 
 function particles(x,y){
 
@@ -1224,32 +1197,34 @@ function particles(x,y){
         const py =
             y + Math.sin(angle)*radius;
 
-        ctx.fillStyle =
-            "white";
+        ctx.fillStyle = "#ffffff";
+
         ctx.beginPath();
 
         ctx.arc(
             px,
             py,
-            2 + Math.random() * 3,
+            2 + Math.random()*3,
             0,
-            Math.PI * 2
+            Math.PI*2
         );
 
         ctx.fill();
+
     }
 
 }
 
 
-/* ==========================================
+/* =====================================
    SCANNER
-========================================== */
+===================================== */
 
-function scanner(x, y, w, h) {
+function scanner(x,y,w,h){
 
     const offset =
-        Math.sin(Date.now() / 400) * h * 0.35;
+        Math.sin(Date.now()/400)
+        * h * 0.35;
 
     ctx.strokeStyle = "#00ffff";
 
@@ -1258,13 +1233,13 @@ function scanner(x, y, w, h) {
     ctx.beginPath();
 
     ctx.moveTo(
-        x - w * 0.5,
-        y + offset
+        x-w*0.5,
+        y+offset
     );
 
     ctx.lineTo(
-        x + w * 0.5,
-        y + offset
+        x+w*0.5,
+        y+offset
     );
 
     ctx.stroke();
@@ -1272,11 +1247,12 @@ function scanner(x, y, w, h) {
 }
 
 
-/* ==========================================
+/* =====================================
    END
-========================================== */
+===================================== */
 
 </script>
 
 </body>
 </html>
+}
